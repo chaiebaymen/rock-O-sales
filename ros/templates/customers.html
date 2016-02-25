@@ -1,0 +1,326 @@
+{% extends 'post-login-template.html' %}
+{% load static %}
+{% block content %}
+<section class="col-md-12">
+    <div class="col-md-10" style="margin-left: 8%;">
+        <h3 class="p_head"></h3>
+        <ul class="customer-record-table">
+            <li class="customer-record-table-headers">
+                    <div class="cust-id">
+                        SL. No.
+                    </div>
+                    <div class="cust-name">
+                        Name
+                    </div>
+                    <div class="cust-email">
+                        Email
+                    </div>
+                    <div class="cust-contact">
+                        Contact
+                    </div>
+                    <div class="cust-address">
+                        Address
+                    </div>
+                <div class="cust-actions">
+                    Actions
+                </div>
+            </li>
+            <div id="customer-table-rows">
+
+            </div>
+        </ul>
+
+        <div class="to_separate">
+            <button class="btn btn_add" id="add-new-customer"> + Add</button>
+            <button class="btn btn_add" id="cancel"> Cancel</button>
+        </div>
+    </div>
+</section>
+<section class="col-md-12">
+    <div class="col-md-8" style="margin-left: 15%;">
+        <div id="new-customer-form" class="hide">
+            <h3 class="p_head">Add New Customer</h3>
+
+            <div class="required-field-block">
+                <input type="text" id="cust-name" name="cust-name" placeholder="Name" class="form-control">
+            </div>
+            <div class="required-field-block">
+                <input type="text" id="cust-email" name="cust-email" placeholder="Email" class="form-control">
+            </div>
+            <div class="required-field-block">
+                <input type="text" id="cust-contact" name="cust-contact" placeholder="Contact" class="form-control">
+            </div>
+            <div class="required-field-block">
+                <input type="text" id="house_no" name="house_no" placeholder="House No" class="form-control">
+            </div>
+            <div class="required-field-block">
+                <input type="text" id="street_name" name="street_name" placeholder="Street Name" class="form-control">
+            </div>
+            <div class="required-field-block">
+                <input type="text" id="locality" name="locality" placeholder="Locality" class="form-control">
+            </div>
+            <div class="required-field-block">
+                <input type="text" id="landmark" name="landmark" placeholder="Landmark" class="form-control">
+            </div>
+            <div class="required-field-block">
+                <input type="text" id="city" name="city" placeholder="City" class="form-control">
+            </div>
+            <div class="required-field-block">
+                <input type="text" id="state-or-province" name="state-or-province" placeholder="State/Province"
+                       class="form-control">
+            </div>
+            <div class="required-field-block">
+                <input type="text" id="pincode" name="pincode" placeholder="Pincode" class="form-control">
+            </div>
+            <button class="btn btn_add" id="new-customer-submit">Submit</button>
+        </div>
+    </div>
+</section>
+{% endblock %}
+{% block javascript %}
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+        $.ajax({
+            url: '/api/GetAllCustomers/',
+            type: 'GET',
+            dataTpe: 'application/json',
+            data: {format: 'json'},
+            success: function (response) {
+                var customers = response;
+                var customerRecordHTML = "";
+                for (var customerIndex = 0; customerIndex < customers.length; customerIndex++) {
+                    var customer = customers[customerIndex];
+                    customerRecordHTML = customerRecordHTML + "<li class='product-record-item'>";
+                    customerRecordHTML = customerRecordHTML + "<div class='cust-id' id='record-" + (customerIndex + 1) + "-cust-id'>";
+                    customerRecordHTML = customerRecordHTML + customer.cust_id.toString();
+                    customerRecordHTML = customerRecordHTML + "</div>";
+                    customerRecordHTML = customerRecordHTML + "<div class='cust-name' id='record-" + (customerIndex + 1) + "-cust-name'>";
+                    customerRecordHTML = customerRecordHTML + customer.cust_name.toString();
+                    customerRecordHTML = customerRecordHTML + "</div>";
+                    customerRecordHTML = customerRecordHTML + "<div class='cust-email' id='record-" + (customerIndex + 1) + "-cust-email'>";
+                    customerRecordHTML = customerRecordHTML + customer.email.toString();
+                    customerRecordHTML = customerRecordHTML + "</div>";
+                    customerRecordHTML = customerRecordHTML + "<div class='cust-contact' id='record-" + (customerIndex + 1) + "-cust-contact'>";
+                    customerRecordHTML = customerRecordHTML + customer.contact.toString();
+                    customerRecordHTML = customerRecordHTML + "</div>";
+                    customerRecordHTML = customerRecordHTML + "<div class='cust-address' id='record-" + (customerIndex + 1) + "-cust-address'>";
+                    var addressArray = customer.address.toString().substring(1, customer.address.toString().length - 1).split(",");
+                    var address = "";
+                    for (var i = 0; i < addressArray.length; i++)
+                        addressArray[i] = addressArray[i].replace("u\'", "").replace("\'", "").toString();
+                    address = addressArray.join(',\n');
+                    customerRecordHTML = customerRecordHTML + address;
+                    customerRecordHTML = customerRecordHTML + "</div>";
+                    customerRecordHTML = customerRecordHTML + "<div class='cust-actions'>";
+                    customerRecordHTML = customerRecordHTML + "<div class='col-md-12' style='width: 75px; height: 20px;vertical-align: bottom; padding:0px; margin: 10px;'>";
+                    customerRecordHTML = customerRecordHTML + "<div class='col-md-6'>";
+                    customerRecordHTML = customerRecordHTML + "<img src='/static/images/edit.png' style='width: 20px; height: 20px;vertical-align: bottom; padding:0px; margin: 0px;' data-toggle='tooltip' title='Edit Record' id='edit-record-" + customer.cust_id.toString() + "' onclick='editRecord(" + customer.cust_id.toString() + ")'>";
+                    customerRecordHTML = customerRecordHTML + "</div>";
+                    customerRecordHTML = customerRecordHTML + "<div class='col-md-6'>";
+                    customerRecordHTML = customerRecordHTML + "<img src='/static/images/delete.png' style='width: 20px; height: 25px;vertical-align: bottom; padding:0px; margin: 0px;' data-toggle='tooltip' title='Delete Record' id='delete-record-" + customer.cust_id.toString() + "' onclick='deleteRecord(" + customer.cust_id.toString() + ")'>";
+                    customerRecordHTML = customerRecordHTML + "</div>";
+                    customerRecordHTML = customerRecordHTML + "</div>";
+                    customerRecordHTML = customerRecordHTML + "</div>";
+                    customerRecordHTML = customerRecordHTML + "</li>";
+                }
+                $('#customer-table-rows').html(customerRecordHTML);
+            }
+        });
+    });
+    function editRecord(id) {
+        var editObject = $('#edit-record-' + id.toString());
+        var deleteObject = $('#delete-record-' + id.toString());
+        var currentImagePath = editObject.attr('src').toString();
+        var editImagePath = '/static/images/edit.png';
+        var saveImagePath = '/static/image/save.png';
+        if (currentImagePath.localeCompare(editImagePath) == 0) {
+            editObject.attr('src', '/static/images/save.png');
+            editObject.attr('style', 'width: 25px; height: 25px;vertical-align: bottom; padding:0px; margin: 0px;');
+            editObject.attr('title', 'Update Record');
+            deleteObject.attr('src', '/static/images/cancel.png');
+            deleteObject.attr('style', 'width: 25px; height: 25px;vertical-align: bottom; padding:0px; margin: 0px;');
+            deleteObject.attr('title', 'Cancel');
+            deleteObject.attr('onclick', 'cancelUpdateRecord(' + id + ')');
+            var custIDObject = $('#record-' + id.toString() + '-cust-id');
+            var custNameObject = $('#record-' + id.toString() + '-cust-name');
+            var custEmailObject = $('#record-' + id.toString() + '-cust-email');
+            var custContactObject = $('#record-' + id.toString() + '-cust-contact');
+            var custAddressObject = $('#record-' + id.toString() + '-cust-address');
+            var custID = custIDObject.html();
+            var custName = custNameObject.html();
+            var custEmail = custEmailObject.html();
+            var custContact = custContactObject.html();
+            var custAddress = custAddressObject.html();
+            var custNameObjectHTML = "<input type='text' value='" + custName + "' id='record-tb-" + id.toString() + "-cust-name'>";
+            custNameObject.html(custNameObjectHTML);
+            var custEmailObjectHTML = "<input type='text' value='" + custEmail + "' id='record-tb-" + id.toString() + "-cust-email'>";
+            custEmailObject.html(custEmailObjectHTML);
+            var custContactObjectHTML = "<input type='text' value='" + custContact + "' id='record-tb-" + id.toString() + "-cust-contact'>";
+            custContactObject.html(custContactObjectHTML);
+            var custAddressObjectHTML = "<textarea rows='8' cols='25' id='record-ta-" + id.toString() + "-cust-address'>" + custAddress + "</textarea>";
+            custAddressObject.html(custAddressObjectHTML);
+        }
+        else {
+            editObject.attr('src', '/static/images/edit.png');
+            editObject.attr('style', 'width: 20px; height: 20px; vertical-align: bottom; padding:0px; margin: 0px;');
+            editObject.attr('title', 'Edit Record');
+            deleteObject.attr('src', '/static/images/delete.png');
+            deleteObject.attr('style', 'width: 20px; height: 25px; vertical-align: bottom; padding:0px; margin: 0px;');
+            deleteObject.attr('title', 'Delete Record');
+            deleteObject.removeAttr('onclick');
+            custIDObject = $('#record-' + id.toString() + '-cust-id');
+            custNameObject = $('#record-tb-' + id.toString() + '-cust-name');
+            custEmailObject = $('#record-tb-' + id.toString() + '-cust-email');
+            custContactObject = $('#record-tb-' + id.toString() + '-cust-contact');
+            custAddressObject = $('#record-ta-' + id.toString() + '-cust-address');
+            custID = custIDObject.html();
+            custName = custNameObject.val();
+            custEmail = custEmailObject.val();
+            custContact = custContactObject.val();
+            var rawCustAddress = custAddressObject.val().toString().replace(new RegExp('\r?\n', 'g'), '');
+            custAddress = rawCustAddress.split(',');
+            custNameObject.html(custName);
+            custEmailObject.html(custEmail);
+            custContactObject.html(custContact);
+            custAddressObject.html(custAddress);
+            var customer = {};
+            customer.cust_name = custName;
+            customer.email = custEmail;
+            customer.contact = custContact;
+            customer.address = custAddress;
+            customer.csrfmiddlewaretoken = getCookie('csrftoken');
+            var customerJSONObject = JSON.stringify(customer, "\n");
+            updateRecord(id, customerJSONObject);
+        }
+
+    }
+    function deleteRecord(id) {
+        var retVal = confirm('Do you want to continue?');
+        if (retVal == true) {
+            $.ajaxSetup({
+                beforeSend: function (xhr, settings) {
+                    if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                        xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+                    }
+                }
+            });
+            $.ajax({
+                async: false,
+                url: '/api/DeleteCustomerById/' + id + '/',
+                type: 'DELETE',
+                dataType: 'json',
+                contentType: 'application/json',
+                headers: {"Authorization": "Basic " + window.btoa("spinny:spinny")},
+                success: function (response) {
+                    alert('Record Deleted!');
+                },
+                error: function (error) {
+                    alert(error.detail);
+                }
+
+            });
+            window.location.reload();
+        }
+    }
+    function cancelUpdateRecord(id) {
+        window.location.reload();
+    }
+    $('#new-customer-submit').click(function () {
+        var house_no = $('#house_no').val().toString();
+        var street_name = $('#street_name').val().toString();
+        var locality = $('#locality').val().toString();
+        var landmark = $('#landmark').val().toString();
+        var city = $('#city').val().toString();
+        var state_or_province = $('#state-or-province').val().toString();
+        var pincode = $('#pincode').val().toString();
+        var cust_name = $('#cust-name').val().toString();
+        var cust_email = $('#cust-email').val().toString();
+        var cust_contact = $('#cust-contact').val().toString();
+        var address = [house_no, street_name, locality, landmark, city, state_or_province, pincode];
+        var customer = {};
+        customer.cust_name = cust_name;
+        customer.email = cust_email;
+        customer.contact = cust_contact;
+        customer.address = address;
+        customer.csrfmiddlewaretoken = getCookie('csrftoken');
+        $.ajaxSetup({
+            beforeSend: function (xhr, settings) {
+                if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                    xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+                }
+            }
+        });
+        var customerJSONObject = JSON.stringify(customer, "\n");
+        $.ajax({
+            async: false,
+            url: '/api/PostNewCustomer/',
+            type: 'POST',
+            dataType: 'json',
+            contentType: 'application/json',
+            headers: {"Authorization": "Basic " + window.btoa("spinny:spinny")},
+            data: customerJSONObject,
+            success: function (response) {
+                alert('New Customer Added!');
+            },
+            error: function (error) {
+                alert(error.detail);
+            }
+
+        });
+        window.location.reload();
+    });
+    $('#add-new-customer').click(function () {
+        $('#new-customer-form').attr('class', 'show');
+    });
+    $('#cancel').click(function () {
+        window.location.reload();
+    });
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie != '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = jQuery.trim(cookies[i]);
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    function csrfSafeMethod(method) {
+        return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+    }
+    function cancel() {
+        window.location.reload();
+    }
+    function updateRecord(record_id, JSONObject) {
+        $.ajaxSetup({
+            beforeSend: function (xhr, settings) {
+                if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                    xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+                }
+            }
+        });
+        $.ajax({
+            async: false,
+            url: '/api/UpdateCustomerById/' + record_id + '/',
+            type: 'PUT',
+            dataType: 'json',
+            contentType: 'application/json',
+            headers: {"Authorization": "Basic " + window.btoa("spinny:spinny")},
+            data: JSONObject,
+            success: function (response) {
+                alert('Record Updated!');
+            },
+            error: function (error) {
+                alert(error.detail);
+            }
+        });
+        window.location.reload();
+    }
+</script>
+{% endblock %}
